@@ -1,37 +1,62 @@
 package org.ptitsyn;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Main {
     public static void main(String args[]) throws Exception{
-        int[] arraySingle = new int[100000];
-        int[] arrayMulti = new int[100000];
-
-        SingleMergeSort singleMergeSort = new SingleMergeSort();
+        int[] arraySingle = new int[30000000];
 
         for (int i = 0; i < arraySingle.length; i++) {
-            arraySingle[i] = arrayMulti[i] = (int)(Math.random() * 1000);
+            arraySingle[i] = (int)(Math.random() * 1000);
         }
 
-        long startTimeSingle = System.nanoTime();
-        int[] sortedArraySingle = singleMergeSort.mergeSort(arraySingle);
-        long stopTimeSingle = System.nanoTime();
+        List<int[]> groupOfMultiArr = new ArrayList<>();
+        int[] arrayMulti;
+        int[] groupOfWorkers = new int[] {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
 
-        long startTimeMulti = System.nanoTime();
-        SortWorker firstWorker = new SortWorker(arrayMulti);
-        firstWorker.start();
-        try {
-            firstWorker.join();
+        for (int i = 0; i < groupOfWorkers.length; i++) {
+            arrayMulti = Arrays.copyOf(arraySingle, arraySingle.length);
+            groupOfMultiArr.add(arrayMulti);
         }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-        long stopTimeMulti = System.nanoTime();
 
-        long timeDifference = (stopTimeSingle - startTimeSingle) - (stopTimeMulti - startTimeMulti);
-        System.out.println("Время, потраченное на выполнение однопоточной сортировки, нс: " + (stopTimeSingle - startTimeSingle));
-        System.out.println("Время, потраченное на выполнение многопоточной сортировки, нс: " + (stopTimeMulti - startTimeMulti));
-        System.out.println("Разница времени исполнения: " + timeDifference);
+        long startTimeSingle = System.currentTimeMillis();
+        SingleMergeSort singleMergeSort = new SingleMergeSort(arraySingle);
+        int[] sortedArraySingle = singleMergeSort.getGlobalArray();
+        long stopTimeSingle = System.currentTimeMillis();
+
+        long timeOfSingle = stopTimeSingle - startTimeSingle;
+        System.out.println("Время, потраченное на выполнение однопоточной сортировки, мс: " + timeOfSingle);
+        ParallelMergeSort parallelMergeSort;
+        System.out.println("Время, потраченное на выполнение многопоточной сортировки:");
+        for (int i = 0; i < groupOfWorkers.length; i++) {
+            long startTimeMulti = System.currentTimeMillis();
+            parallelMergeSort = new ParallelMergeSort(groupOfMultiArr.get(i), groupOfWorkers[i]);
+            parallelMergeSort.sortArray();
+            long stopTimeMulti = System.currentTimeMillis();
+            groupOfMultiArr.set(i, parallelMergeSort.getGlobalArray());
+
+            long timeDifference = timeOfSingle - (stopTimeMulti - startTimeMulti);
+            System.out.println(Arrays.equals(groupOfMultiArr.get(i), arraySingle));
+            System.out.println("Количество потоков: " + groupOfWorkers[i] + "\nВремя исполнения, мс: " + (stopTimeMulti - startTimeMulti));
+            System.out.println("Разница времени исполнения, мс: " + timeDifference);
+        }
+
+
+
+
+//        long startTimeMulti = System.nanoTime();
+//        SortWorker firstWorker = new SortWorker(arrayMulti);
+//        firstWorker.start();
+//        try {
+//            firstWorker.join();
+//        }
+//        catch(Exception e) {
+//            e.printStackTrace();
+//        }
+//        long stopTimeMulti = System.nanoTime();
+
 //        System.out.println(Arrays.toString(sortedArraySingle));
 //        System.out.println(Arrays.toString(firstWorker.getSortedArray()));
 

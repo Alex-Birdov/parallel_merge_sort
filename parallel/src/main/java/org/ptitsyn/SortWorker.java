@@ -11,7 +11,7 @@ public class SortWorker extends Thread{
         return this.arr;
     }
     public void run() {
-        SingleMergeSort singleMergeSort = new SingleMergeSort();
-        arr = singleMergeSort.mergeSort(arr);
+        SingleMergeSort singleMergeSort = new SingleMergeSort(arr);
+        arr = singleMergeSort.getGlobalArray();
     }
 }

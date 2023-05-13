@@ -15,79 +15,66 @@ public class ParallelMergeSort {
         this.numberOfWorkers = numberOfWorkers;
 //        Записываем в последнего работника последнюю часть массива, в случае если длина массива делится на число всех работников с остатком
 //       Передаем работнику часть его массива
-        SortWorker worker = new SortWorker(Arrays.copyOfRange(globalArray, (numberOfWorkers - 1) * globalArray.length / numberOfWorkers, (numberOfWorkers - 2) * globalArray.length / numberOfWorkers));
+        SortWorker worker = new SortWorker(Arrays.copyOfRange(globalArray, globalArray.length / numberOfWorkers * (numberOfWorkers - 1), globalArray.length));
         sortWorkers.add(worker);
         for (int i = 0; i < numberOfWorkers - 1; i++) {
-            worker = new SortWorker(Arrays.copyOfRange(globalArray, i * globalArray.length / numberOfWorkers, globalArray.length));
+            worker = new SortWorker(Arrays.copyOfRange(globalArray, globalArray.length / numberOfWorkers * i, globalArray.length / numberOfWorkers * (i + 1)));
             sortWorkers.add(worker);
         }
     }
+    public int[] getGlobalArray() {
+        return globalArray;
+    }
 
     public int[] sortArray() {
+        List<int[]> sortedArrays = new ArrayList<>();
 //        Запускаем всех работников
         for (int i = 0; i < numberOfWorkers; i++) {
             sortWorkers.get(i).start();
         }
-//        Ждем, пока все работники закончат сортировку
+//        Ждем, пока все работники закончат сортировку, записываем отсортированные массивы в список
+//        Освобождаем работников
         for (SortWorker worker : sortWorkers) {
             try {
                 worker.join();
+                sortedArrays.add(worker.getSortedArray());
+                worker = null;
             }
             catch (Exception e) {
                 e.printStackTrace();
             }
         }
-//        for (int i = 0; i < numberOfWorkers / 2; i++) {
-//            MergeWorker mergeWorker = new MergeWorker(sortWorkers.get(i).getSortedArray(), sortWorkers.get(i+1).getSortedArray());
-//            mergeWorkers.add(mergeWorker);
-//        }
 
-//      Список групп со степенями 2 для части массива
-        ArrayList<Integer> groupOfMergers = new ArrayList<>();
-        int tempNumOfWorkers = numberOfWorkers;
+//      Глубина погружения
+        int depth = (int)log2(numberOfWorkers);
         do {
-            groupOfMergers.add((int) log2(tempNumOfWorkers));
-            tempNumOfWorkers = (int) (tempNumOfWorkers - Math.pow(2, tempNumOfWorkers));
-        }
-        while (tempNumOfWorkers > 0);
-
-        for (int mergeGroup : groupOfMergers) {
-
-        }
-//      Массив индексов отсортированных частей массива
-        int arrayIndexOfPart = 0;
-        for (int numOfMergers : groupOfMergers) {
-            int counter = numOfMergers;
-            do {
-                counter--;
-                for (int i = 0; i < (int)Math.pow(2, numOfMergers); i+=2) {
-                    MergeWorker mergeWorker = new MergeWorker(sortWorkers.get(arrayIndexOfPart).getSortedArray(), sortWorkers.get(arrayIndexOfPart + 1).getSortedArray());
-                    mergeWorkers.add(mergeWorker);
-                    arrayIndexOfPart += 2;
+            depth--;
+            int takenPart = 0;
+//            Выделяем потоки слияния
+            for (int i = 0; i < (int)Math.pow(2, depth); i++) {
+                MergeWorker mergeWorker = new MergeWorker(sortedArrays.get(takenPart), sortedArrays.get(takenPart + 1));
+                takenPart += 2;
+                mergeWorker.start();
+                mergeWorkers.add(mergeWorker);
+            }
+//            Ждем, пока все потоки слияния завершат работу, перезаписываем объедененные массивы в первые элементы списка
+//            Освобождаем работников
+            int counter = 0;
+            for (MergeWorker worker : mergeWorkers) {
+                try {
+                    worker.join();
+                    sortedArrays.set(counter, worker.getMergedArray());
+                    counter++;
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
-            while (counter >= 0);
+//            Очищаем список с потоками сливателей
+            mergeWorkers.clear();
         }
-//      Ждем завершения слияния всех массивов
-        for (MergeWorker worker : mergeWorkers) {
-            try {
-                worker.join();
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
-//        int numberOfMergers = (int)log2(numberOfWorkers);
-        for (MergeWorker worker : mergeWorkers) {
-            try{
-                worker.join();
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        globalArray = new int[globalArray.length];
+        while (depth >= 0);
+        globalArray = sortedArrays.get(0);
         return globalArray;
     }
     public double log2(int x) {

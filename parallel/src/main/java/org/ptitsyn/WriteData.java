@@ -13,8 +13,7 @@ public class WriteData {
     int[] arr;
 
     WriteData(int amountOfArr, int rangeOfLength, int rangeOfValue) {
-        SingleMergeSort singleMergeSort = new SingleMergeSort();
-
+        SingleMergeSort singleMergeSort;
         for (int i = 0; i <= amountOfArr; i++) {
             int length = (int) (Math.random() * (rangeOfLength - 1) + 1);
             arr = new int[length];
@@ -22,7 +21,8 @@ public class WriteData {
             for (int j = 0; j < length; j++) {
                 arr[j] = (int) (Math.random() * rangeOfValue - rangeOfValue / 2);
             }
-            sortedListOfArrays.add(singleMergeSort.mergeSort(arr));
+            singleMergeSort = new SingleMergeSort(arr);
+            sortedListOfArrays.add(singleMergeSort.getGlobalArray());
             listOfArrays.add(arr);
         }
     }

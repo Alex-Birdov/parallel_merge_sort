@@ -3,7 +3,6 @@ package org.ptitsyn;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,13 +18,14 @@ public class MainTest {
 
     @Test
     public void testMergeSort() throws Exception{
-        SingleMergeSort singleMergeSort = new SingleMergeSort();
+        SingleMergeSort singleMergeSort;
         String path = "./src\\main\\resources";
         List <int[]> listOfArrays = readData.readData(path, "test_input.txt");
         List <int[]> sortedListOfArrays  = readData.readData(path, "test_output.txt");
 
         for (int i = 0; i < sortedListOfArrays.size(); i++){
-            assertEquals(Arrays.toString(sortedListOfArrays.get(i)), Arrays.toString(singleMergeSort.mergeSort(listOfArrays.get(i))));
+            singleMergeSort = new SingleMergeSort(listOfArrays.get(i));
+            assertEquals(Arrays.toString(sortedListOfArrays.get(i)), Arrays.toString(singleMergeSort.getGlobalArray()));
         }
     }
 }

@@ -1,44 +1,53 @@
 package org.ptitsyn;
 
-import java.util.Arrays;
-
 public class SingleMergeSort {
+    private int[] globalArray;
 
-    SingleMergeSort() {
+    SingleMergeSort(int[] globalArray) {
+        this.globalArray = globalArray;
+        mergeSort(globalArray, globalArray.length);
+    }
+    public int[] getGlobalArray() {
+        return  globalArray;
     }
 
-    public static int[] mergeSort(int[] sortArr) {
-        int[] array1 = Arrays.copyOf(sortArr, sortArr.length);
-        int[] array2 = new int[sortArr.length];
-        int[] result = mergeSortInner(array1, array2, 0, sortArr.length);
-        return result;
+    public static void mergeSort(int[] array, int arrayLength) {
+        if (arrayLength < 2) {
+            return;
+        }
+        int mid = arrayLength / 2;
+        int[] leftArray = new int[mid];
+        int[] rightArray = new int[arrayLength - mid];
+
+        for (int i = 0; i < mid; i++) {
+            leftArray[i] = array[i];
+        }
+        for (int i = mid; i < arrayLength; i++) {
+            rightArray[i - mid] = array[i];
+        }
+        mergeSort(leftArray, mid);
+        mergeSort(rightArray, arrayLength - mid);
+
+        merge(array, leftArray, rightArray, mid, arrayLength - mid);
     }
 
-    public static int[] mergeSortInner(int[] array1, int[] array2, int startIndex, int endIndex) {
-        if (startIndex >= endIndex - 1) {
-            return array1;
-        }
+    public static void merge(int[] array, int[] leftArray, int[] rightArray, int leftLength, int rightLength) {
 
-        //уже отсортирован
-        int middle = (startIndex + endIndex) / 2;
-        int[] sorted1 = mergeSortInner(array1, array2, startIndex, middle);
-        int[] sorted2 = mergeSortInner(array1, array2, middle, endIndex);
-
-        //слияние
-        int index1 = startIndex;
-        int index2 = middle;
-        int tempIndex = startIndex;
-        array2 = new int[array1.length];
-        while (index1 < middle && index2 < endIndex) {
-            array2[tempIndex++] = sorted1[index1] < sorted2[index2]
-                    ? sorted1[index1++] : sorted2[index2++];
+        int i = 0, j = 0, k = 0;
+        while (i < leftLength && j < rightLength) {
+            if (leftArray[i] <= rightArray[j]) {
+                array[k++] = leftArray[i++];
+            }
+            else {
+                array[k++] = rightArray[j++];
+            }
         }
-        while (index1 < middle) {
-            array2[tempIndex++] = sorted1[index1++];
+        while (i < leftLength) {
+            array[k++] = leftArray[i++];
         }
-        while (index2 < endIndex) {
-            array2[tempIndex++] = sorted2[index2++];
+        while (j < rightLength) {
+            array[k++] = rightArray[j++];
         }
-        return array2;
     }
 }
+
