@@ -32,7 +32,6 @@ public class SingleMergeSort {
     }
 
     public static void merge(int[] array, int[] leftArray, int[] rightArray, int leftLength, int rightLength) {
-
         int i = 0, j = 0, k = 0;
         while (i < leftLength && j < rightLength) {
             if (leftArray[i] <= rightArray[j]) {

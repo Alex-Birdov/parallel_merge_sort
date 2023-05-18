@@ -29,7 +29,7 @@ public class Main {
         long timeOfSingle = stopTimeSingle - startTimeSingle;
         System.out.println("Время, потраченное на выполнение однопоточной сортировки, мс: " + timeOfSingle);
         ParallelMergeSort parallelMergeSort;
-        System.out.println("Время, потраченное на выполнение многопоточной сортировки:");
+        System.out.println("Время, потраченное на выполнение многопоточной сортировки, мс: ");
         for (int i = 0; i < groupOfWorkers.length; i++) {
             long startTimeMulti = System.currentTimeMillis();
             parallelMergeSort = new ParallelMergeSort(groupOfMultiArr.get(i), groupOfWorkers[i]);

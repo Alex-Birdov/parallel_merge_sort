@@ -10,22 +10,22 @@ import static org.junit.Assert.*;
 
 public class MainTest {
     ReadData readData;
-
     @Before
     public void setUp() {
         readData = new ReadData();
     }
-
     @Test
     public void testMergeSort() throws Exception{
+        ParallelMergeSort parallelMergeSort;
         SingleMergeSort singleMergeSort;
         String path = "./src\\main\\resources";
         List <int[]> listOfArrays = readData.readData(path, "test_input.txt");
         List <int[]> sortedListOfArrays  = readData.readData(path, "test_output.txt");
 
         for (int i = 0; i < sortedListOfArrays.size(); i++){
+            parallelMergeSort = new ParallelMergeSort(listOfArrays.get(i), 16);
             singleMergeSort = new SingleMergeSort(listOfArrays.get(i));
-            assertEquals(Arrays.toString(sortedListOfArrays.get(i)), Arrays.toString(singleMergeSort.getGlobalArray()));
+            assertEquals(Arrays.toString(sortedListOfArrays.get(i)), Arrays.toString(parallelMergeSort.getGlobalArray()));
         }
     }
 }
